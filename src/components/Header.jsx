@@ -1,10 +1,11 @@
-import { Globe2, AlarmClock, Timer, Clock } from "lucide-react";
+import { Globe2, AlarmClock, Timer, Clock, Notebook } from "lucide-react";
 
 const tabs = [
   { id: "worldclock", label: "Giờ quốc tế", icon: Globe2 },
   { id: "alarm", label: "Báo thức", icon: AlarmClock },
   { id: "stopwatch", label: "Đồng hồ bấm giờ", icon: Clock },
   { id: "countdown", label: "Đếm ngược", icon: Timer },
+  { id: "notebook", label: "Ghi chú", icon: Notebook },
 ];
 
 export function Header({ activeTab, setActiveTab }) {
