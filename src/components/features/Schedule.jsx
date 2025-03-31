@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CohereClientV2 } from "cohere-ai";
+import ReactMarkdown from "react-markdown";
 
 const cohere = new CohereClientV2({
     token: import.meta.env.VITE_COHERE_API_KEY,
@@ -43,7 +44,7 @@ export function Schedule() {
                             <p className="font-semibold">Bạn:</p>
                             <p className="mb-2">{chat.user}</p>
                             <p className="font-semibold">AI:</p>
-                            <p>{chat.ai}</p>
+                            <ReactMarkdown className="prose max-w-none">{chat.ai}</ReactMarkdown>
                         </div>
                     ))}
                 </div>
