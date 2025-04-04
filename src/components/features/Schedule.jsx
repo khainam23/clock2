@@ -39,6 +39,8 @@ export function Schedule() {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [aiContent, setAiContent] = useState("");
+  const [history, setHistory] = useState([]);
+  const [selectedHistoryIndex, setSelectedHistoryIndex] = useState(null);
 
   const handleEventClick = (clickInfo) => {
     Swal.fire({
@@ -77,8 +79,18 @@ export function Schedule() {
 
       const aiResponse =
         response?.message?.content?.[0]?.text || "Không có phản hồi từ AI.";
-      setAiContent(marked.parse(aiResponse));
-      setIsModalOpen(true); // Hiện modal
+      const parsedContent = marked.parse(aiResponse);
+      setAiContent(parsedContent);
+      setIsModalOpen(true);
+
+      // ✅ Thêm vào lịch sử
+      setHistory((prev) => [
+        ...prev,
+        {
+          timestamp: new Date().toLocaleString(),
+          content: parsedContent,
+        },
+      ]);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -119,6 +131,31 @@ export function Schedule() {
         >
           {loading ? "Đang phân tích..." : "Phân tích lịch trình bằng AI"}
         </button>
+
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2 text-gray-700">
+            🧠 Lịch sử phân tích
+          </h3>
+          {history.length === 0 ? (
+            <p className="text-gray-500">Chưa có phân tích nào.</p>
+          ) : (
+            <ul className="space-y-2">
+              {history.map((item, index) => (
+                <li
+                  key={index}
+                  className="p-2 border rounded-md cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    setAiContent(item.content);
+                    setIsModalOpen(true);
+                    setSelectedHistoryIndex(index);
+                  }}
+                >
+                  🔹 Phân tích lúc {item.timestamp}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* Modal phân tích AI */}
