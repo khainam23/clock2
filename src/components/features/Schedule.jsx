@@ -1,22 +1,18 @@
 import { useState } from "react";
 import { CohereClientV2 } from "cohere-ai";
-import ReactMarkdown from "react-markdown";
 import Swal from "sweetalert2";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { marked } from "marked";
+import ModalAnalysis from "../ModalAnalysis.jsx";
 
 const cohere = new CohereClientV2({
   token: import.meta.env.VITE_COHERE_API_KEY,
 });
 
 export function Schedule() {
-  const [chatHistory, setChatHistory] = useState([]);
-  const [userInput, setUserInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [events, setEvents] = useState([
     {
       id: "1",
@@ -40,30 +36,9 @@ export function Schedule() {
       duration: 90,
     },
   ]);
-
-  const handleChat = async () => {
-    if (!userInput.trim()) return;
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await cohere.chat({
-        model: "command-a-03-2025",
-        messages: [{ role: "user", content: userInput }],
-      });
-
-      const aiResponse =
-        response?.message?.content?.[0]?.text ||
-        "Lỗi: Không nhận được phản hồi từ AI";
-      setChatHistory((prev) => [...prev, { user: userInput, ai: aiResponse }]);
-    } catch (error) {
-      console.error("Lỗi khi gọi API Cohere:", error);
-      setError("Không thể kết nối với AI. Vui lòng thử lại sau.");
-    }
-
-    setUserInput("");
-    setLoading(false);
-  };
+  const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [aiContent, setAiContent] = useState("");
 
   const handleEventClick = (clickInfo) => {
     Swal.fire({
@@ -88,42 +63,35 @@ export function Schedule() {
 
   const evaluateTasks = async () => {
     setLoading(true);
-    setError(null);
-
     try {
-      const chatTasks = chatHistory.map((chat) => chat.user).join("; ");
       const response = await cohere.chat({
         model: "command-a-03-2025",
         messages: [
           {
             role: "user",
             content: `Đây là lịch trình: ${JSON.stringify(events)}. 
-                    Ngoài ra, đây là các công việc từ đoạn chat: ${chatTasks}. 
-                    Hãy đánh giá mức độ quan trọng, dự đoán thời gian hoàn thành và đề xuất cách sắp xếp hợp lý. 
-                    Đưa ra danh sách các công việc cần ưu tiên trước và những công việc có thể trì hoãn.`,
+                      Hãy đánh giá mức độ quan trọng, dự đoán thời gian hoàn thành và đề xuất cách sắp xếp hợp lý.`,
           },
         ],
       });
 
       const aiResponse =
-        response?.message?.content?.[0]?.text ||
-        "Lỗi: Không nhận được phản hồi từ AI";
-      Swal.fire({
-        title: "Gợi ý từ AI",
-        html: marked.parse(aiResponse), // Chuyển đổi Markdown thành HTML
-        icon: "info",
-        preLine: true,
-      });
+        response?.message?.content?.[0]?.text || "Không có phản hồi từ AI.";
+      setAiContent(marked.parse(aiResponse));
+      setIsModalOpen(true); // Hiện modal
     } catch (error) {
-      setError("Lỗi kết nối với AI. Vui lòng thử lại.");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi kết nối",
+        text: "Không thể kết nối với AI.",
+      });
     }
-
     setLoading(false);
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 pl-20 gap-6">
-      <div className="w-1/2 bg-white shadow-lg rounded-xl p-6 flex flex-col">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-5xl bg-white shadow-lg rounded-xl p-6">
         <h2 className="text-2xl font-bold text-center mb-4 text-gray-700">
           📅 Lịch trình
         </h2>
@@ -145,46 +113,20 @@ export function Schedule() {
           />
         </div>
         <button
-          className="px-4 py-2 border rounded-md bg-blue-500 text-white hover:bg-blue-600 mt-4"
+          className="mt-6 px-4 py-2 border rounded-md bg-blue-500 text-white hover:bg-blue-600"
           onClick={evaluateTasks}
           disabled={loading}
         >
-          {loading ? "Đang phân tích..." : "Phân tích lịch trình"}
+          {loading ? "Đang phân tích..." : "Phân tích lịch trình bằng AI"}
         </button>
       </div>
-      <div className="w-1/2 bg-white shadow-lg rounded-xl p-6 flex flex-col">
-        <h2 className="text-xl font-bold text-center mb-4">
-          Trò chuyện với AI
-        </h2>
-        <div className="flex-1 max-h-96 overflow-auto border p-4 rounded-md bg-gray-50 space-y-2">
-          {chatHistory.map((chat, index) => (
-            <div key={index} className="p-2 border rounded-md bg-white">
-              <p className="font-semibold">Bạn:</p>
-              <p className="mb-2">{chat.user}</p>
-              <p className="font-semibold">AI:</p>
-              <ReactMarkdown>{chat.ai}</ReactMarkdown>
-            </div>
-          ))}
-        </div>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-        <div className="mt-4 flex gap-2">
-          <input
-            type="text"
-            className="flex-1 p-2 border rounded-md"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Nhập câu hỏi của bạn..."
-            disabled={loading}
-          />
-          <button
-            className="px-4 py-2 border rounded-md bg-green-500 text-white hover:bg-green-600"
-            onClick={handleChat}
-            disabled={loading}
-          >
-            {loading ? "Đang xử lý..." : "Hỏi AI"}
-          </button>
-        </div>
-      </div>
+
+      {/* Modal phân tích AI */}
+      <ModalAnalysis
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        aiContent={aiContent}
+      />
     </div>
   );
 }
