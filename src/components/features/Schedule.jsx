@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CohereClientV2 } from "cohere-ai";
 import Swal from "sweetalert2";
 import FullCalendar from "@fullcalendar/react";
@@ -20,6 +20,9 @@ export function Schedule() {
       start: "2025-04-01",
       priority: 3,
       duration: 60,
+      backgroundColor: "#4CAF50",
+      borderColor: "#4CAF50",
+      description: "Thảo luận về tiến độ dự án"
     },
     {
       id: "2",
@@ -27,6 +30,9 @@ export function Schedule() {
       start: "2025-04-02",
       priority: 5,
       duration: 120,
+      backgroundColor: "#F44336",
+      borderColor: "#F44336",
+      description: "Nộp báo cáo tiến độ tháng"
     },
     {
       id: "3",
@@ -34,6 +40,9 @@ export function Schedule() {
       start: "2025-04-03",
       priority: 4,
       duration: 90,
+      backgroundColor: "#2196F3",
+      borderColor: "#2196F3",
+      description: "Phỏng vấn ứng viên cho vị trí developer"
     },
     {
       id: "4",
@@ -41,6 +50,9 @@ export function Schedule() {
       start: "2025-04-01",
       priority: 2,
       duration: 30,
+      backgroundColor: "#FF9800",
+      borderColor: "#FF9800",
+      description: "Kiểm tra lỗi chính tả và nội dung"
     },
     {
       id: "5",
@@ -48,31 +60,38 @@ export function Schedule() {
       start: "2025-04-01",
       priority: 1,
       duration: 10,
+      backgroundColor: "#9C27B0",
+      borderColor: "#9C27B0",
+      description: "Gửi email xác nhận lịch hẹn"
     },
   ]);
+
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [aiContent, setAiContent] = useState("");
   const [history, setHistory] = useState([]);
+  const [aiContent, setAiContent] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHistoryIndex, setSelectedHistoryIndex] = useState(null);
 
   const handleEventClick = (clickInfo) => {
+    const event = clickInfo.event;
     Swal.fire({
-      title: "Chỉnh sửa công việc",
-      input: "text",
-      inputValue: clickInfo.event.title,
+      title: event.title,
+      html: `
+        <div>
+          <p><strong>Thời gian:</strong> ${event.start ? new Date(event.start).toLocaleString() : 'Chưa xác định'}</p>
+          <p><strong>Mô tả:</strong> ${event.extendedProps.description || 'Không có mô tả'}</p>
+        </div>
+      `,
       showCancelButton: true,
-      confirmButtonText: "Lưu",
-      cancelButtonText: "Hủy",
-      preConfirm: (newTitle) => {
-        if (!newTitle) {
-          Swal.showValidationMessage("Nội dung công việc không được để trống!");
-        }
-        return newTitle;
-      },
+      confirmButtonText: 'Chỉnh sửa',
+      cancelButtonText: 'Đóng',
+      showDenyButton: true,
+      denyButtonText: 'Xóa'
     }).then((result) => {
       if (result.isConfirmed) {
-        clickInfo.event.setProp("title", result.value);
+        editEvent(event);
+      } else if (result.isDenied) {
+        deleteEvent(event);
       }
     });
   };
@@ -164,30 +183,44 @@ export function Schedule() {
           addBtn.addEventListener("click", () => {
             Swal.fire({
               title: "➕ Thêm công việc",
-              input: "text",
-              inputLabel: "Nhập tên công việc",
+              html: `
+                <input id="swal-title" class="swal2-input" placeholder="Tiêu đề công việc">
+                <textarea id="swal-description" class="swal2-textarea" placeholder="Mô tả chi tiết"></textarea>
+                <input id="swal-color" class="swal2-input" type="color" value="#4CAF50">
+              `,
+              focusConfirm: false,
               showCancelButton: true,
               confirmButtonText: "Thêm",
               cancelButtonText: "Hủy",
-              preConfirm: (newTask) => {
-                if (!newTask) {
+              preConfirm: () => {
+                const title = document.getElementById('swal-title').value;
+                const description = document.getElementById('swal-description').value;
+                const color = document.getElementById('swal-color').value;
+
+                if (!title) {
                   Swal.showValidationMessage("Công việc không được để trống!");
+                  return false;
                 }
-                return newTask;
+
+                return { title, description, color };
               },
             }).then((result) => {
               if (result.isConfirmed) {
+                const { title, description, color } = result.value;
                 const newEvent = {
                   id: String(Date.now()), // tạo ID mới
-                  title: result.value,
+                  title,
                   start: selectedDate,
+                  backgroundColor: color,
+                  borderColor: color,
+                  description,
                   priority: 1,
                   duration: 30,
                 };
                 setEvents((prev) => [...prev, newEvent]);
                 Swal.fire(
                   "✅ Đã thêm!",
-                  `Công việc "${result.value}" đã được thêm vào.`,
+                  `Công việc "${title}" đã được thêm vào.`,
                   "success"
                 );
               }
@@ -195,6 +228,101 @@ export function Schedule() {
           });
         }
       },
+    });
+  };
+
+  const handleEventDrop = (dropInfo) => {
+    const { event } = dropInfo;
+
+    // Lấy thông tin về sự kiện được kéo
+    const updatedEvent = {
+      id: event.id,
+      title: event.title,
+      start: event.startStr,
+      end: event.endStr,
+      backgroundColor: event.backgroundColor,
+      borderColor: event.borderColor,
+      description: event.extendedProps.description || '',
+      priority: event.extendedProps.priority || 1,
+      duration: event.extendedProps.duration || 30,
+    };
+
+    // Cập nhật danh sách sự kiện
+    setEvents(prev => prev.map(e => e.id === event.id ? updatedEvent : e));
+
+    // Hiển thị thông báo thành công
+    Swal.fire({
+      title: "Cập nhật thành công!",
+      text: `Công việc "${event.title}" đã được di chuyển đến ${new Date(event.startStr).toLocaleDateString()}`,
+      icon: "success",
+      timer: 2000,
+      timerProgressBar: true,
+      showConfirmButton: false
+    });
+  };
+
+  const editEvent = (event) => {
+    Swal.fire({
+      title: 'Chỉnh sửa công việc',
+      html: `
+        <input id="swal-title" class="swal2-input" placeholder="Tiêu đề công việc" value="${event.title}">
+        <textarea id="swal-description" class="swal2-textarea" placeholder="Mô tả chi tiết">${event.extendedProps.description || ''}</textarea>
+        <input id="swal-color" class="swal2-input" type="color" value="${event.backgroundColor}">
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Cập nhật',
+      cancelButtonText: 'Hủy',
+      preConfirm: () => {
+        const title = document.getElementById('swal-title').value;
+        const description = document.getElementById('swal-description').value;
+        const color = document.getElementById('swal-color').value;
+
+        if (!title) {
+          Swal.showValidationMessage('Vui lòng nhập tiêu đề công việc');
+          return false;
+        }
+
+        return { title, description, color };
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const { title, description, color } = result.value;
+
+        const updatedEvents = events.map((e) => {
+          if (e.id === event.id) {
+            return {
+              ...e,
+              title,
+              backgroundColor: color,
+              borderColor: color,
+              description
+            };
+          }
+          return e;
+        });
+
+        setEvents(updatedEvents);
+        Swal.fire('Thành công!', 'Đã cập nhật công việc.', 'success');
+      }
+    });
+  };
+
+  const deleteEvent = (event) => {
+    Swal.fire({
+      title: 'Xác nhận xóa',
+      text: `Bạn có chắc chắn muốn xóa công việc "${event.title}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+      confirmButtonColor: '#d33'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const filteredEvents = events.filter(e => e.id !== event.id);
+        setEvents(filteredEvents);
+        Swal.fire('Đã xóa!', 'Công việc đã được xóa.', 'success');
+      }
     });
   };
 
@@ -206,7 +334,7 @@ export function Schedule() {
         messages: [
           {
             role: "user",
-            content: `Đây là lịch trình: ${JSON.stringify(events)}. 
+            content: `Đây là lịch trình: ${JSON.stringify(events)}.
                       Hãy đánh giá mức độ quan trọng, dự đoán thời gian hoàn thành và đề xuất cách sắp xếp hợp lý.`,
           },
         ],
@@ -255,19 +383,35 @@ export function Schedule() {
             selectable={true}
             eventClick={handleEventClick}
             dateClick={handleDateClick}
-            dayMaxEvents={true} // 👈 Hiện +n nếu quá nhiều
+            eventDrop={handleEventDrop}
+            eventResize={handleEventDrop}
+            droppable={true}
+            dayMaxEvents={true}
             height="auto"
             className="rounded-md shadow-md"
+            locale="vi"
+            buttonText={{
+              today: 'Hôm nay',
+              month: 'Tháng',
+              week: 'Tuần',
+              day: 'Ngày'
+            }}
           />
         </div>
 
-        <button
-          className="mt-6 px-4 py-2 border rounded-md bg-blue-500 text-white hover:bg-blue-600"
-          onClick={evaluateTasks}
-          disabled={loading}
-        >
-          {loading ? "Đang phân tích..." : "Phân tích lịch trình bằng AI"}
-        </button>
+        <div className="mt-4 flex justify-between items-center">
+          <div className="text-sm text-gray-600">
+            <p>💡 <strong>Mẹo:</strong> Kéo và thả để di chuyển công việc giữa các ngày</p>
+            <p>🔄 Nhấp vào công việc để xem chi tiết, chỉnh sửa hoặc xóa</p>
+          </div>
+          <button
+            className="px-4 py-2 border rounded-md bg-blue-500 text-white hover:bg-blue-600"
+            onClick={evaluateTasks}
+            disabled={loading}
+          >
+            {loading ? "Đang phân tích..." : "Phân tích lịch trình bằng AI"}
+          </button>
+        </div>
 
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2 text-gray-700">
