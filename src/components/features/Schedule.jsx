@@ -22,7 +22,7 @@ export function Schedule() {
       duration: 60,
       backgroundColor: "#4CAF50",
       borderColor: "#4CAF50",
-      description: "Thảo luận về tiến độ dự án"
+      description: "Thảo luận về tiến độ dự án",
     },
     {
       id: "2",
@@ -32,37 +32,37 @@ export function Schedule() {
       duration: 120,
       backgroundColor: "#F44336",
       borderColor: "#F44336",
-      description: "Nộp báo cáo tiến độ tháng"
+      description: "Nộp báo cáo tiến độ tháng",
     },
     {
       id: "3",
       title: "Thuyết trình kết quả",
-      start: "2025-04-03",
+      start: "2025-04-11",
       priority: 4,
       duration: 90,
       backgroundColor: "#2196F3",
       borderColor: "#2196F3",
-      description: "Phỏng vấn ứng viên cho vị trí developer"
+      description: "Phỏng vấn ứng viên cho vị trí developer",
     },
     {
       id: "4",
       title: "Soát lỗi nội dung",
-      start: "2025-04-01",
+      start: "2025-04-10",
       priority: 2,
       duration: 30,
       backgroundColor: "#FF9800",
       borderColor: "#FF9800",
-      description: "Kiểm tra lỗi chính tả và nội dung"
+      description: "Kiểm tra lỗi chính tả và nội dung",
     },
     {
       id: "5",
       title: "Gửi mail cho giảng viên",
-      start: "2025-04-01",
+      start: "2025-04-15",
       priority: 1,
       duration: 10,
       backgroundColor: "#9C27B0",
       borderColor: "#9C27B0",
-      description: "Gửi email xác nhận lịch hẹn"
+      description: "Gửi email xác nhận lịch hẹn",
     },
   ]);
 
@@ -78,15 +78,21 @@ export function Schedule() {
       title: event.title,
       html: `
         <div>
-          <p><strong>Thời gian:</strong> ${event.start ? new Date(event.start).toLocaleString() : 'Chưa xác định'}</p>
-          <p><strong>Mô tả:</strong> ${event.extendedProps.description || 'Không có mô tả'}</p>
+          <p><strong>Thời gian:</strong> ${
+            event.start
+              ? new Date(event.start).toLocaleString()
+              : "Chưa xác định"
+          }</p>
+          <p><strong>Mô tả:</strong> ${
+            event.extendedProps.description || "Không có mô tả"
+          }</p>
         </div>
       `,
       showCancelButton: true,
-      confirmButtonText: 'Chỉnh sửa',
-      cancelButtonText: 'Đóng',
+      confirmButtonText: "Chỉnh sửa",
+      cancelButtonText: "Đóng",
       showDenyButton: true,
-      denyButtonText: 'Xóa'
+      denyButtonText: "Xóa",
     }).then((result) => {
       if (result.isConfirmed) {
         editEvent(event);
@@ -193,9 +199,10 @@ export function Schedule() {
               confirmButtonText: "Thêm",
               cancelButtonText: "Hủy",
               preConfirm: () => {
-                const title = document.getElementById('swal-title').value;
-                const description = document.getElementById('swal-description').value;
-                const color = document.getElementById('swal-color').value;
+                const title = document.getElementById("swal-title").value;
+                const description =
+                  document.getElementById("swal-description").value;
+                const color = document.getElementById("swal-color").value;
 
                 if (!title) {
                   Swal.showValidationMessage("Công việc không được để trống!");
@@ -242,49 +249,59 @@ export function Schedule() {
       end: event.endStr,
       backgroundColor: event.backgroundColor,
       borderColor: event.borderColor,
-      description: event.extendedProps.description || '',
+      description: event.extendedProps.description || "",
       priority: event.extendedProps.priority || 1,
       duration: event.extendedProps.duration || 30,
     };
 
     // Cập nhật danh sách sự kiện
-    setEvents(prev => prev.map(e => e.id === event.id ? updatedEvent : e));
+    setEvents((prev) =>
+      prev.map((e) => (e.id === event.id ? updatedEvent : e))
+    );
 
     // Hiển thị thông báo thành công
     Swal.fire({
       title: "Cập nhật thành công!",
-      text: `Công việc "${event.title}" đã được di chuyển đến ${new Date(event.startStr).toLocaleDateString()}`,
+      text: `Công việc "${event.title}" đã được di chuyển đến ${new Date(
+        event.startStr
+      ).toLocaleDateString()}`,
       icon: "success",
       timer: 2000,
       timerProgressBar: true,
-      showConfirmButton: false
+      showConfirmButton: false,
     });
   };
 
   const editEvent = (event) => {
     Swal.fire({
-      title: 'Chỉnh sửa công việc',
+      title: "Chỉnh sửa công việc",
       html: `
-        <input id="swal-title" class="swal2-input" placeholder="Tiêu đề công việc" value="${event.title}">
-        <textarea id="swal-description" class="swal2-textarea" placeholder="Mô tả chi tiết">${event.extendedProps.description || ''}</textarea>
-        <input id="swal-color" class="swal2-input" type="color" value="${event.backgroundColor}">
+        <input id="swal-title" class="swal2-input" placeholder="Tiêu đề công việc" value="${
+          event.title
+        }">
+        <textarea id="swal-description" class="swal2-textarea" placeholder="Mô tả chi tiết">${
+          event.extendedProps.description || ""
+        }</textarea>
+        <input id="swal-color" class="swal2-input" type="color" value="${
+          event.backgroundColor
+        }">
       `,
       focusConfirm: false,
       showCancelButton: true,
-      confirmButtonText: 'Cập nhật',
-      cancelButtonText: 'Hủy',
+      confirmButtonText: "Cập nhật",
+      cancelButtonText: "Hủy",
       preConfirm: () => {
-        const title = document.getElementById('swal-title').value;
-        const description = document.getElementById('swal-description').value;
-        const color = document.getElementById('swal-color').value;
+        const title = document.getElementById("swal-title").value;
+        const description = document.getElementById("swal-description").value;
+        const color = document.getElementById("swal-color").value;
 
         if (!title) {
-          Swal.showValidationMessage('Vui lòng nhập tiêu đề công việc');
+          Swal.showValidationMessage("Vui lòng nhập tiêu đề công việc");
           return false;
         }
 
         return { title, description, color };
-      }
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         const { title, description, color } = result.value;
@@ -296,32 +313,32 @@ export function Schedule() {
               title,
               backgroundColor: color,
               borderColor: color,
-              description
+              description,
             };
           }
           return e;
         });
 
         setEvents(updatedEvents);
-        Swal.fire('Thành công!', 'Đã cập nhật công việc.', 'success');
+        Swal.fire("Thành công!", "Đã cập nhật công việc.", "success");
       }
     });
   };
 
   const deleteEvent = (event) => {
     Swal.fire({
-      title: 'Xác nhận xóa',
+      title: "Xác nhận xóa",
       text: `Bạn có chắc chắn muốn xóa công việc "${event.title}"?`,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy',
-      confirmButtonColor: '#d33'
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+      confirmButtonColor: "#d33",
     }).then((result) => {
       if (result.isConfirmed) {
-        const filteredEvents = events.filter(e => e.id !== event.id);
+        const filteredEvents = events.filter((e) => e.id !== event.id);
         setEvents(filteredEvents);
-        Swal.fire('Đã xóa!', 'Công việc đã được xóa.', 'success');
+        Swal.fire("Đã xóa!", "Công việc đã được xóa.", "success");
       }
     });
   };
@@ -329,19 +346,76 @@ export function Schedule() {
   const evaluateTasks = async () => {
     setLoading(true);
     try {
+      if (!events || events.length === 0) {
+        Swal.fire(
+          "Thông báo",
+          "Chưa có dữ liệu công việc để đánh giá.",
+          "info"
+        );
+        return;
+      }
+
+      const now = new Date();
+      // reset giờ để so sánh chính xác
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+      const filteredEvents = events
+        .filter((e) => {
+          const eventDate = new Date(e.start);
+          return eventDate >= today && eventDate <= endOfMonth;
+        })
+        .map(({ id, title, start, priority, duration, description }) => ({
+          id,
+          title,
+          start,
+          priority,
+          duration,
+          description,
+        }));
+
+      if (filteredEvents.length === 0) {
+        Swal.fire(
+          "Thông báo",
+          "Không có công việc nào từ hôm nay đến cuối tháng.",
+          "info"
+        );
+        return;
+      }
+
       const response = await cohere.chat({
         model: "command-a-03-2025",
         messages: [
           {
             role: "user",
-            content: `Đây là lịch trình: ${JSON.stringify(events)}.
-                      Hãy đánh giá mức độ quan trọng, dự đoán thời gian hoàn thành và đề xuất cách sắp xếp hợp lý.`,
+            content: `
+            Đây là danh sách các công việc và lịch trình từ hôm nay đến cuối tháng: ${JSON.stringify(
+              filteredEvents,
+              null,
+              2
+            )}.
+            Hãy:
+            - Phân tích chi tiết từng công việc dựa vào **tên công việc** và **thời gian được lên lịch**.
+            - Đánh giá **mức độ ưu tiên** của từng công việc (cao, trung bình, thấp).
+            - Ước lượng **thời gian cần thiết** để hoàn thành mỗi công việc.
+            - Gợi ý **các hành động cần làm** cụ thể cho từng đầu việc.
+            - Đề xuất **lịch trình tối ưu**, sắp xếp lại công việc nếu cần (kể cả gợi ý di chuyển thời gian), sao cho phù hợp với độ ưu tiên và tránh dồn việc.
+            
+            Hãy trả lời theo định dạng:
+            - Tên công việc
+            - Ưu tiên: Cao / Trung bình / Thấp
+            - Thời gian ước tính: ... phút / giờ
+            - Việc cần làm: ...
+            - Gợi ý lịch trình tối ưu: ...
+            
+            Nếu thấy lịch hiện tại quá tải, hãy gợi ý tôi điều chỉnh một cách hợp lý.
+                  `,
           },
         ],
       });
 
       const aiResponse =
-        response?.message?.content?.[0]?.text || "Không có phản hồi từ AI.";
+        response?.message?.content[0]?.text || "Không có phản hồi từ AI.";
       const parsedContent = marked.parse(aiResponse);
       setAiContent(parsedContent);
       setIsModalOpen(true);
@@ -349,18 +423,20 @@ export function Schedule() {
       setHistory((prev) => [
         ...prev,
         {
-          timestamp: new Date().toLocaleString(),
-          content: parsedContent,
+          time: new Date().toLocaleString(),
+          content: aiResponse,
         },
       ]);
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi kết nối",
-        text: "Không thể kết nối với AI.",
-      });
+      console.error("Lỗi khi gửi yêu cầu tới AI:", error);
+      Swal.fire(
+        "Lỗi",
+        "Không thể kết nối với AI. Vui lòng thử lại sau.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -391,17 +467,20 @@ export function Schedule() {
             className="rounded-md shadow-md"
             locale="vi"
             buttonText={{
-              today: 'Hôm nay',
-              month: 'Tháng',
-              week: 'Tuần',
-              day: 'Ngày'
+              today: "Hôm nay",
+              month: "Tháng",
+              week: "Tuần",
+              day: "Ngày",
             }}
           />
         </div>
 
         <div className="mt-4 flex justify-between items-center">
           <div className="text-sm text-gray-600">
-            <p>💡 <strong>Mẹo:</strong> Kéo và thả để di chuyển công việc giữa các ngày</p>
+            <p>
+              💡 <strong>Mẹo:</strong> Kéo và thả để di chuyển công việc giữa
+              các ngày
+            </p>
             <p>🔄 Nhấp vào công việc để xem chi tiết, chỉnh sửa hoặc xóa</p>
           </div>
           <button
