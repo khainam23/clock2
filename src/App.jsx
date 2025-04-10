@@ -3,7 +3,7 @@ import { Header } from './components/Header';
 import { Content } from './components/Content';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('worldclock');
+  const [activeTab, setActiveTab] = useState('schedule');
 
   return (
     <div className="min-h-screen bg-gray-100 flex">

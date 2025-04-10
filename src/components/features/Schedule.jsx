@@ -7,70 +7,37 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { marked } from "marked";
 import ModalAnalysis from "../ModalAnalysis.jsx";
+import _ from "lodash";
 
 const cohere = new CohereClientV2({
   token: import.meta.env.VITE_COHERE_API_KEY,
 });
 
 export function Schedule() {
-  const [events, setEvents] = useState([
-    {
-      id: "1",
-      title: "Họp nhóm dự án",
-      start: "2025-04-01",
-      priority: 3,
-      duration: 60,
-      backgroundColor: "#4CAF50",
-      borderColor: "#4CAF50",
-      description: "Thảo luận về tiến độ dự án",
-    },
-    {
-      id: "2",
-      title: "Hoàn thành báo cáo",
-      start: "2025-04-02",
-      priority: 5,
-      duration: 120,
-      backgroundColor: "#F44336",
-      borderColor: "#F44336",
-      description: "Nộp báo cáo tiến độ tháng",
-    },
-    {
-      id: "3",
-      title: "Thuyết trình kết quả",
-      start: "2025-04-11",
-      priority: 4,
-      duration: 90,
-      backgroundColor: "#2196F3",
-      borderColor: "#2196F3",
-      description: "Phỏng vấn ứng viên cho vị trí developer",
-    },
-    {
-      id: "4",
-      title: "Soát lỗi nội dung",
-      start: "2025-04-10",
-      priority: 2,
-      duration: 30,
-      backgroundColor: "#FF9800",
-      borderColor: "#FF9800",
-      description: "Kiểm tra lỗi chính tả và nội dung",
-    },
-    {
-      id: "5",
-      title: "Gửi mail cho giảng viên",
-      start: "2025-04-15",
-      priority: 1,
-      duration: 10,
-      backgroundColor: "#9C27B0",
-      borderColor: "#9C27B0",
-      description: "Gửi email xác nhận lịch hẹn",
-    },
-  ]);
+  const [events, setEvents] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [aiContent, setAiContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHistoryIndex, setSelectedHistoryIndex] = useState(null);
+
+  useEffect(() => {
+    const storedEvents = localStorage.getItem("userEvents");
+    if (storedEvents) {
+      setEvents(JSON.parse(storedEvents));
+    }
+  }, []);
+
+  // Debounced function to save events to local storage
+  const saveEventsToLocalStorage = _.debounce((events) => {
+    localStorage.setItem("userEvents", JSON.stringify(events));
+  }, 1000);
+
+  // Effect to save events to local storage when they change
+  useEffect(() => {
+    saveEventsToLocalStorage(events);
+  }, [events]);
 
   const handleEventClick = (clickInfo) => {
     const event = clickInfo.event;

@@ -8,11 +8,6 @@
   } from "lucide-react";
 
   const tabs = [
-    { id: "worldclock", label: "Giờ quốc tế", icon: Globe2 },
-    { id: "alarm", label: "Báo thức", icon: AlarmClock },
-    { id: "stopwatch", label: "Đồng hồ bấm giờ", icon: Clock },
-    { id: "countdown", label: "Đếm ngược", icon: Timer },
-    { id: "notebook", label: "Ghi chú", icon: Notebook },
     { id: "schedule", label: "Lập lịch", icon: Calendar },
   ];
 
