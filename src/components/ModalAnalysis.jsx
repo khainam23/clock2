@@ -4,6 +4,13 @@ import { Fragment } from 'react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+// Hàm kiểm tra nội dung có phải là HTML không
+function isHTML(content) {
+  const htmlRegex = /<\/?[a-z][\s\S]*>/i;
+  return htmlRegex.test(content.trim());
+}
 
 export default function ModalAnalysis({ isOpen, setIsOpen, aiContent }) {
   const exportToPDF = async () => {
@@ -13,6 +20,17 @@ export default function ModalAnalysis({ isOpen, setIsOpen, aiContent }) {
     const pdf = new jsPDF();
     pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
     pdf.save('AI_phan_tich_lich_trinh.pdf');
+  };
+
+  const renderContent = () => {
+    if (isHTML(aiContent)) {
+      return (
+        <div
+          dangerouslySetInnerHTML={{ __html: aiContent }}
+        />
+      );
+    }
+    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{aiContent}</ReactMarkdown>;
   };
 
   return (
@@ -48,12 +66,14 @@ export default function ModalAnalysis({ isOpen, setIsOpen, aiContent }) {
                 >
                   📊 Gợi ý từ AI
                 </Dialog.Title>
+
                 <div
                   id="ai-analysis-content"
                   className="mt-4 text-gray-700 prose max-w-none"
                 >
-                  <ReactMarkdown>{aiContent}</ReactMarkdown>
+                  {renderContent()}
                 </div>
+
                 <div className="mt-6 flex justify-end gap-2">
                   <button
                     onClick={exportToPDF}
