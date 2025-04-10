@@ -7,21 +7,42 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { marked } from "marked";
 import ModalAnalysis from "../ModalAnalysis.jsx";
-import _ from "lodash";
 
 const cohere = new CohereClientV2({
   token: import.meta.env.VITE_COHERE_API_KEY,
 });
 
 export function Schedule() {
-  const [events, setEvents] = useState([]);
-
+  const [events, setEvents] = useState(() => {
+    // Initialize state with localStorage data
+    const storedEvents = localStorage.getItem("userEvents");
+    return storedEvents ? JSON.parse(storedEvents) : [];
+  });
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState(() => {
+    const storedHistory = localStorage.getItem("analysisHistory");
+    return storedHistory ? JSON.parse(storedHistory) : [];
+  });
   const [aiContent, setAiContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHistoryIndex, setSelectedHistoryIndex] = useState(null);
 
+  useEffect(() => {
+    if (events.length > 0) {
+      localStorage.setItem("userEvents", JSON.stringify(events));
+    }
+  }, [events]);
+
+  useEffect(() => {
+    if (events.length > 0) {
+      localStorage.setItem("userEvents", JSON.stringify(events));
+    }
+    if (history.length > 0) {
+      localStorage.setItem("analysisHistory", JSON.stringify(history));
+    }
+  }, [events, history]);
+
+  // Retrieve events from localStorage on component mount
   useEffect(() => {
     const storedEvents = localStorage.getItem("userEvents");
     if (storedEvents) {
@@ -29,14 +50,9 @@ export function Schedule() {
     }
   }, []);
 
-  // Debounced function to save events to local storage
-  const saveEventsToLocalStorage = _.debounce((events) => {
-    localStorage.setItem("userEvents", JSON.stringify(events));
-  }, 1000);
-
-  // Effect to save events to local storage when they change
+  // Save events to localStorage whenever they change
   useEffect(() => {
-    saveEventsToLocalStorage(events);
+    localStorage.setItem("userEvents", JSON.stringify(events));
   }, [events]);
 
   const handleEventClick = (clickInfo) => {
@@ -392,6 +408,7 @@ export function Schedule() {
         {
           time: new Date().toLocaleString(),
           content: aiResponse,
+          timestamp: new Date().toLocaleString(), // Add timestamp for display
         },
       ]);
     } catch (error) {

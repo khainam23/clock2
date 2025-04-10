@@ -3,6 +3,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import ReactMarkdown from 'react-markdown';
 
 export default function ModalAnalysis({ isOpen, setIsOpen, aiContent }) {
   const exportToPDF = async () => {
@@ -50,8 +51,9 @@ export default function ModalAnalysis({ isOpen, setIsOpen, aiContent }) {
                 <div
                   id="ai-analysis-content"
                   className="mt-4 text-gray-700 prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: aiContent }}
-                />
+                >
+                  <ReactMarkdown>{aiContent}</ReactMarkdown>
+                </div>
                 <div className="mt-6 flex justify-end gap-2">
                   <button
                     onClick={exportToPDF}
