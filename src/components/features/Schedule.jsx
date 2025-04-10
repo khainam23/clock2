@@ -423,20 +423,33 @@ export function Schedule() {
     }
   };
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isSmall = windowWidth < 640;
+  const isMedium = windowWidth < 768;
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-5xl bg-white shadow-lg rounded-xl p-6">
-        <h2 className="text-2xl font-bold text-center mb-4 text-gray-700">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-2 sm:p-4">
+      <div className="w-full max-w-5xl bg-white shadow-lg rounded-xl p-3 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-3 sm:mb-4 text-gray-700">
           📅 Lịch trình
         </h2>
-        <div className="border rounded-lg p-4 bg-gray-50 shadow-sm">
+        <div className="border rounded-lg p-2 sm:p-4 bg-gray-50 shadow-sm">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
+            initialView={isMedium ? "dayGridDay" : "dayGridMonth"}
             headerToolbar={{
-              left: "prev,next today",
+              left: isSmall ? "prev,next" : "prev,next today",
               center: "title",
-              right: "dayGridMonth,timeGridWeek,timeGridDay",
+              right: isSmall
+                ? "dayGridDay,dayGridMonth"
+                : "dayGridMonth,timeGridWeek,timeGridDay",
             }}
             events={events}
             editable={true}
@@ -446,12 +459,12 @@ export function Schedule() {
             eventDrop={handleEventDrop}
             eventResize={handleEventDrop}
             droppable={true}
-            dayMaxEvents={true}
+            dayMaxEvents={!isMedium}
             height="auto"
-            className="rounded-md shadow-md"
+            className="rounded-md shadow-md text-sm sm:text-base"
             locale="vi"
             buttonText={{
-              today: "Hôm nay",
+              today: isSmall ? "Nay" : "Hôm nay",
               month: "Tháng",
               week: "Tuần",
               day: "Ngày",
@@ -459,35 +472,34 @@ export function Schedule() {
           />
         </div>
 
-        <div className="mt-4 flex justify-between items-center">
-          <div className="text-sm text-gray-600">
+        <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+          <div className="text-xs sm:text-sm text-gray-600 space-y-1">
             <p>
-              💡 <strong>Mẹo:</strong> Kéo và thả để di chuyển công việc giữa
-              các ngày
+              💡 <strong>Mẹo:</strong> Kéo và thả để di chuyển công việc
             </p>
-            <p>🔄 Nhấp vào công việc để xem chi tiết, chỉnh sửa hoặc xóa</p>
+            <p>🔄 Nhấp vào công việc để xem chi tiết</p>
           </div>
           <button
-            className="px-4 py-2 border rounded-md bg-blue-500 text-white hover:bg-blue-600"
+            className="w-full sm:w-auto px-3 sm:px-4 py-2 border rounded-md bg-blue-500 text-white hover:bg-blue-600 text-sm sm:text-base"
             onClick={evaluateTasks}
             disabled={loading}
           >
-            {loading ? "Đang phân tích..." : "Phân tích lịch trình bằng AI"}
+            {loading ? "Đang phân tích..." : "Phân tích lịch trình"}
           </button>
         </div>
 
         <div className="mt-4">
-          <h3 className="text-lg font-semibold mb-2 text-gray-700">
+          <h3 className="text-base sm:text-lg font-semibold mb-2 text-gray-700">
             🧠 Lịch sử phân tích
           </h3>
           {history.length === 0 ? (
-            <p className="text-gray-500">Chưa có phân tích nào.</p>
+            <p className="text-sm text-gray-500">Chưa có phân tích nào.</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-2 max-h-40 sm:max-h-60 overflow-y-auto">
               {history.map((item, index) => (
                 <li
                   key={index}
-                  className="p-2 border rounded-md cursor-pointer hover:bg-gray-100"
+                  className="p-2 border rounded-md cursor-pointer hover:bg-gray-100 text-xs sm:text-sm"
                   onClick={() => {
                     setAiContent(item.content);
                     setIsModalOpen(true);
@@ -502,7 +514,6 @@ export function Schedule() {
         </div>
       </div>
 
-      {/* Modal phân tích AI */}
       <ModalAnalysis
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}

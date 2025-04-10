@@ -49,7 +49,7 @@ export default function ModalAnalysis({ isOpen, setIsOpen, aiContent }) {
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-6 text-center">
+          <div className="flex min-h-full items-center justify-center p-2 sm:p-6 text-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -59,31 +59,31 @@ export default function ModalAnalysis({ isOpen, setIsOpen, aiContent }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-3 sm:p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-xl font-semibold leading-6 text-gray-800"
+                  className="text-lg sm:text-xl font-semibold leading-6 text-gray-800"
                 >
                   📊 Gợi ý từ AI
                 </Dialog.Title>
 
                 <div
                   id="ai-analysis-content"
-                  className="mt-4 text-gray-700 prose max-w-none"
+                  className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-700 prose max-w-none overflow-y-auto max-h-[60vh] sm:max-h-[70vh]"
                 >
                   {renderContent()}
                 </div>
 
-                <div className="mt-6 flex justify-end gap-2">
+                <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-end gap-2">
                   <button
                     onClick={exportToPDF}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-green-600 text-white rounded-md hover:bg-green-700"
                   >
                     Tải xuống PDF
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                    className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-gray-300 rounded-md hover:bg-gray-400"
                   >
                     Đóng
                   </button>
