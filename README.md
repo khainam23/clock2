@@ -55,11 +55,6 @@ Truy cập bản demo tại: [clock2-nk23.vercel.app](clock2-nk23.vercel.app)
 
 5\. Mở trình duyệt và truy cập `http://localhost:5173` để xem ứng dụng.​
 
-📁 Cấu trúc thư mục
--------------------
-
-`clock2/ ├── public/             # Tệp tĩnh ├── src/                # Mã nguồn chính │   ├── components/     # Các component React │   ├── pages/          # Các trang chính │   └── assets/         # Hình ảnh và tài nguyên khác ├── index.html          # Tệp HTML chính ├── package.json        # Thông tin dự án và các gói phụ thuộc └── vite.config.ts      # Cấu hình Vite`
-
 📄 Giấy phép
 ------------
 
